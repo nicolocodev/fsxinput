@@ -67,9 +67,11 @@ type DisconnectEventArgs(playerIndex) =
     with member this.ControllerButton = index
 
 type Controller(playerIndex:int) =     
+
     let _playerIndex = playerIndex    
     let mutable state = new State()
     let mutable vibration = new Vibatrion()    
+    let pollState = GetState(_playerIndex, &state) = 0
 
     let onButtonPress = new Event<ButtonEventArgs>()
     let buttonPressTrigger button = onButtonPress.Trigger (new ButtonEventArgs(button))    
@@ -86,57 +88,37 @@ type Controller(playerIndex:int) =
             (task,observable)        
         let task, stream = poll
         stream |> Observable.subscribe (fun _ -> 
-                    if not <| this.PollState then                         
-                        timer.Stop() 
-                        disconnectTrigger _playerIndex
+                    if not <| pollState then timer.Stop(); this.Turnoff();
                     match state.GamePad.Buttons with
                     | ControllerButtons.None -> ()                
-                    | _ -> buttonPressTrigger state.GamePad.Buttons) 
-                |> ignore 
+                    | _ -> buttonPressTrigger state.GamePad.Buttons) |> ignore 
         Async.RunSynchronously task
 
-    member this.Turnoff playerIndex =
-        TurnOff(playerIndex) |> ignore
-        ()
+    member this.Turnoff() = _playerIndex |> TurnOff  |> ignore        
 
     [<CLIEvent>]
     member this.OnButtonPress = onButtonPress.Publish      
 
     [<CLIEvent>]
-    member this.OnDisconnect = onDisconnect.Publish      
-
-    member this.PollState = GetState(_playerIndex, &state) = 0
+    member this.OnDisconnect = onDisconnect.Publish          
     
-    member this.IsConnected = this.PollState
+    member this.IsConnected = pollState
     
-    member this.LeftMotorSpeed
-        with get() = vibration.LeftMotorSpeed
-        and set(value) =                    
-            vibration.LeftMotorSpeed <- value
-            SetState(_playerIndex, &vibration) |> ignore     
+    member this.LeftMotorSpeed = vibration.LeftMotorSpeed        
 
-    member this.RightMotorSpeed
-        with get() = vibration.RightMotorSpeed
-        and set(value) = 
-            vibration.RightMotorSpeed <- value
-            SetState(_playerIndex, &vibration) |> ignore            
+    member this.RightMotorSpeed = vibration.RightMotorSpeed        
 
-    member this.State =
-        this.PollState |> ignore
-        state
+    member this.State = pollState |> ignore; state
 
     member this.Vibrate leftMotorSpeed rightMotorSpeed =
         vibration.LeftMotorSpeed <- leftMotorSpeed
         vibration.RightMotorSpeed <- rightMotorSpeed 
-        SetState(_playerIndex, &vibration) |> ignore     
-        ()
+        SetState(_playerIndex, &vibration) |> ignore             
 
 type ControllerCollection() =
     let controllers = [new Controller(0); new Controller(1); new Controller(2); new Controller(3)]
     member this.Controller with get(index) = controllers.[index]
 
-type Xinput() =
-    static let error = 0    
+type Xinput() =    
     static let controllerList = new ControllerCollection()    
     static member Controllers = controllerList
-    static member Error = error

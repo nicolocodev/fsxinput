@@ -4,7 +4,7 @@ open System
 [<EntryPoint>]
 let main argv =
 
-    let controller = Xinput.Controllers.Controller(0)
+    let controller = Xinput.Controllers.Controller(1)
     let isConnected = controller.IsConnected
 
     let startUsingController() =
@@ -26,7 +26,7 @@ let main argv =
         let guideButton = 
             observable 
             |> Observable.filter(fun args -> args.ControllerButton = ControllerButtons.Guide) 
-            |> Observable.subscribe(fun _ -> controller.Turnoff 0)             
+            |> Observable.subscribe(fun _ -> controller.Turnoff)             
 
         controller.Start 100.0
 
