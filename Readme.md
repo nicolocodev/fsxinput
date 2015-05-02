@@ -1,12 +1,12 @@
 # FsXinput
 
-This repository contains a F# wrapper around [XInput Api](http://msdn.microsoft.com/en-us/library/windows/desktop/hh405053%28v=vs.85%29.aspx) and a Demo console application
+This repository contains an F# wrapper around [XInput Api](http://msdn.microsoft.com/en-us/library/windows/desktop/hh405053%28v=vs.85%29.aspx) and a Demo console application
 
 ## Overview
 
 I wrote this code just for fun and learning purposes, the FsXinput code is a translation of the code from [this great article](http://blogs.msdn.com/b/pstubbs/archive/2006/02/13/531008.aspx), but of course, a bit more functional.
 
-I added an event-driven behaivor, so, you can get an Controller instance and subscribe to the event.
+I added an event-driven behaivor, so, you can get a Controller instance and subscribe to the event.
 
 Also you can use observable (in a FRP way) to query the events stream.
 
